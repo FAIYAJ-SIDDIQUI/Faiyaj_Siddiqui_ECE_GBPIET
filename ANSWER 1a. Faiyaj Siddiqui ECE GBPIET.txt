@@ -1,9 +1,3 @@
-ANSWER 1a.
-
-
-
-
-
 #include <iostream>
 #include <vector>
 #include <memory>
