@@ -1,0 +1,107 @@
+ANSWER 1a.
+
+
+
+
+
+#include <iostream>
+#include <vector>
+#include <memory>
+
+// Abstract base class for all logic gates
+class LogicGate {
+public:
+    virtual bool evaluate() = 0;
+    virtual void setInput(bool input1, bool input2 = false) = 0;
+};
+
+// Derived class for AND gate
+class ANDGate : public LogicGate {
+    bool input1, input2;
+public:
+    void setInput(bool in1, bool in2) override {
+        input1 = in1;
+        input2 = in2;
+    }
+    bool evaluate() override {
+        return input1 && input2;        // AND Operation
+    }
+};
+
+// Derived class for OR gate
+class ORGate : public LogicGate {
+    bool input1, input2;
+public:
+    void setInput(bool in1, bool in2) override {
+        input1 = in1;
+        input2 = in2;
+    }
+    bool evaluate() override {
+        return input1 || input2;      // OR Operation
+    }
+};
+
+// Derived class for NOT gate
+class NOTGate : public LogicGate {
+    bool input;
+public:
+    void setInput(bool in1, bool in2 = false) override {
+        input = in1;
+    }
+    bool evaluate() override {
+        return !input;	   // NOT Operation
+    }
+};
+
+// Derived class for XOR gate
+class XORGate : public LogicGate {
+    bool input1, input2;
+public:
+    void setInput(bool in1, bool in2) override {
+        input1 = in1;
+        input2 = in2;
+    }
+    bool evaluate() override {
+        return input1 != input2;           // XOR Operation
+    }
+};
+
+// Circuit class to manage a collection of logic gates
+class Circuit {
+    std::vector<std::unique_ptr<LogicGate>> gates;
+public:
+    void addGate(std::unique_ptr<LogicGate> gate) {
+        gates.push_back(std::move(gate));
+    }
+    bool evaluate() {
+        if (gates.empty()) return false;           // No gates to evaluate
+        return gates.back()->evaluate();       
+       // Evaluate the output of the last gate in the circuit
+    }
+};
+
+int main() {
+
+    // Creating object for Circuit class
+    Circuit circuit;
+
+    // Creating objects for all logic gates class
+    auto andGate = std::make_unique<ANDGate>();
+    auto orGate = std::make_unique<ORGate>();
+    auto notGate = std::make_unique<NOTGate>();
+    auto xorGate = std::make_unique<XORGate>();
+
+    // Setting inputs for all gates
+    andGate->setInput(true, false);
+    orGate->setInput(true, false);
+    notGate->setInput(andGate->evaluate());
+    xorGate->setInput(orGate->evaluate(), notGate->evaluate());
+
+    // for Adding gates to the circuit
+    circuit.addGate(std::move(xorGate));
+
+    // Evaluate the circuit and print the output
+    std::cout << "Circuit output: " << circuit.evaluate() << std::endl;
+
+    return 0;
+}

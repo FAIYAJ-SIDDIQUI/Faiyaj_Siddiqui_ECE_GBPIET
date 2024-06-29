@@ -1,0 +1,166 @@
+ANSWER 1b.
+
+
+
+
+#include <iostream>
+#include <vector>
+#include <memory>
+#include <stdexcept>           // For exception handling
+
+// Abstract base class for all logic gates
+class LogicGate {
+public:
+    virtual bool evaluate() = 0;
+    virtual void setInput(bool input1, bool input2 = false) = 0;
+};
+
+// Derived class for AND gate
+class ANDGate : public LogicGate {
+    bool input1, input2;
+public:
+    void setInput(bool in1, bool in2) override {
+        input1 = in1;
+        input2 = in2;
+    }
+    bool evaluate() override {
+        return input1 && input2;
+    }
+};
+
+// Derived class for OR gate
+class ORGate : public LogicGate {
+    bool input1, input2;
+public:
+    void setInput(bool in1, bool in2) override {
+        input1 = in1;
+        input2 = in2;
+    }
+    bool evaluate() override {
+        return input1 || input2;
+    }
+};
+
+// Derived class for NOT gate
+class NOTGate : public LogicGate {
+    bool input;
+public:
+    void setInput(bool in1, bool in2 = false) override {
+        input = in1;
+    }
+    bool evaluate() override {
+        return !input;
+    }
+};
+
+// Derived class for XOR gate
+class XORGate : public LogicGate {
+    bool input1, input2;
+public:
+    void setInput(bool in1, bool in2) override {
+        input1 = in1;
+        input2 = in2;
+    }
+    bool evaluate() override {
+        return input1 != input2;
+    }
+};
+
+// Adding new gate classes for NAND, NOR, and XNOR gates
+class NANDGate : public LogicGate {
+    bool input1, input2;
+public:
+    void setInput(bool in1, bool in2) override {
+        input1 = in1;
+        input2 = in2;
+    }
+    bool evaluate() override {
+        return !(input1 && input2);
+    }
+};
+
+class NORGate : public LogicGate {
+    bool input1, input2;
+public:
+    void setInput(bool in1, bool in2) override {
+        input1 = in1;
+        input2 = in2;
+    }
+    bool evaluate() override {
+        return !(input1 || input2);
+    }
+};
+
+class XNORGate : public LogicGate {
+    bool input1, input2;
+public:
+    void setInput(bool in1, bool in2) override {
+        input1 = in1;
+        input2 = in2;
+    }
+    bool evaluate() override {
+        return input1 == input2;
+    }
+};
+
+// Circuit class to manage a collection of logic gates
+class Circuit {
+    std::vector<std::unique_ptr<LogicGate>> gates;
+public:
+    void addGate(std::unique_ptr<LogicGate> gate) {
+        gates.push_back(std::move(gate));
+    }
+
+    // Evaluate the output of the entire circuit for given inputs
+    bool evaluate(bool input1, bool input2) {
+        if (gates.empty()) {
+            throw std::invalid_argument("Circuit has no gates to evaluate.");
+        }
+
+        // Set inputs for the first gate in the circuit
+        gates[0]->setInput(input1, input2);
+
+        // Evaluate each gate in series (assuming the circuit is linear)
+        for (size_t i = 1; i < gates.size(); ++i) {
+            gates[i]->setInput(gates[i-1]->evaluate());
+        }
+
+        // Return the output of the last gate in the circuit
+        return gates.back()->evaluate();
+    }
+};
+
+int main() {
+    // Creating object for Circuit class
+    Circuit circuit;
+
+    // Creating objects for all logic gates class
+    auto andGate = std::make_unique<ANDGate>();
+    auto orGate = std::make_unique<ORGate>();
+    auto notGate = std::make_unique<NOTGate>();
+    auto xorGate = std::make_unique<XORGate>();
+    auto nandGate = std::make_unique<NANDGate>();
+    auto norGate = std::make_unique<NORGate>();
+    auto xnorGate = std::make_unique<XNORGate>();
+
+    // for Adding gates to the circuit
+    circuit.addGate(std::move(andGate));
+    circuit.addGate(std::move(orGate));
+    circuit.addGate(std::move(notGate));
+    circuit.addGate(std::move(xorGate));
+    circuit.addGate(std::move(nandGate));
+    circuit.addGate(std::move(norGate));
+    circuit.addGate(std::move(xnorGate));
+
+    try {
+        // Evaluate the circuit with inputs and print the output
+        bool input1 = true;
+        bool input2 = false;
+        bool circuitOutput = circuit.evaluate(input1, input2);
+        std::cout << "Circuit output: " << circuitOutput << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+
+    return 0;
+}
